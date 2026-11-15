@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberRecover – Cyberattack Disaster Recovery Toolkit</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#e2e8f0;--mut:#94a3b8;--acc:#38bdf8;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5}
+header{padding:20px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:1.5rem}header p{margin:4px 0 0;color:var(--mut)}
+nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{background:var(--card);color:var(--txt);border:1px solid var(--line);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.95rem}
+nav button.on{background:var(--acc);color:#0f172a;font-weight:600}
+main{max-width:900px;margin:0 auto;padding:20px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{margin-top:0}h3{margin:0 0 8px}
+textarea,input,select{width:100%;background:#0b1220;color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}
+textarea{min-height:150px}
+label{display:block;margin:10px 0 4px;color:var(--mut);font-size:.9rem}
+.btn{background:var(--acc);color:#0f172a;border:0;padding:10px 16px;border-radius:8px;font-weight:600;cursor:pointer;margin:8px 8px 0 0}
+.btn.sec{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.tile{background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:14px;cursor:pointer}
+.tile:hover{border-color:var(--acc)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:700}
+.low{background:var(--ok);color:#052e16}.med{background:var(--warn);color:#451a03}.high{background:var(--bad);color:#fff}
+.bar{height:10px;background:#0b1220;border-radius:99px;overflow:hidden;margin:8px 0}
+.bar>div{height:100%;background:var(--ok);width:0;transition:width .3s}
+.step{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+.step input{width:auto;margin-top:5px}
+.step.done span{text-decoration:line-through;color:var(--mut)}
+.step small{display:block;color:var(--mut)}
+.timer{font-variant-numeric:tabular-nums;font-size:1.6rem;font-weight:700;color:var(--warn)}
+ul{padding-left:20px}
+.note{color:var(--mut);font-size:.85rem}
+.sos{background:#450a0a;border:1px solid var(--bad);border-radius:10px;padding:12px;margin-bottom:16px}
+pre{white-space:pre-wrap;background:#0b1220;border:1px solid var(--line);border-radius:8px;padding:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡️ CyberRecover</h1>
+  <p>Prepare for, respond to, and recover from cyberattacks: phishing, tech support scams and ransomware. Runs entirely in your browser; nothing you enter is uploaded.</p>
+</header>
+<nav id="nav">
+  <button data-t="home" class="on">Start here</button>
+  <button data-t="phish">Phishing checker</button>
+  <button data-t="play">Response playbook</button>
+  <button data-t="ready">Readiness score</button>
+  <button data-t="comm">Community alert</button>
+</nav>
+<main>
+
+<section id="home" class="on">
+  <div class="sos"><strong>Under attack right now?</strong> Pick what is happening. We'll open the matching step-by-step playbook with a timer.</div>
+  <div class="grid">
+    <div class="tile" data-play="ransom"><h3>🔒 Files are locked / ransom note</h3><span class="note">Ransomware playbook</span></div>
+    <div class="tile" data-play="phish"><h3>🎣 I clicked a link or opened an attachment</h3><span class="note">Phishing / credential compromise playbook</span></div>
+    <div class="tile" data-play="scam"><h3>📞 Someone claiming to be tech support has access or took money</h3><span class="note">Tech support scam playbook</span></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>How this maps to disaster recovery</h2>
+    <ul>
+      <li><b>Prepare:</b> Readiness score measures backups, MFA, and planning, and estimates your recovery gaps.</li>
+      <li><b>Prevent / detect:</b> Phishing checker flags scam emails, texts and pop-ups.</li>
+      <li><b>Respond and recover:</b> Timed playbooks: contain, assess, eradicate, recover, learn. Exportable incident log.</li>
+      <li><b>Community:</b> Generate a ready-to-send warning for staff, family, or neighbours so one victim protects many.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="phish">
+  <div class="card">
+    <h2>Phishing &amp; scam checker</h2>
+    <p class="note">Paste a suspicious email, SMS, or pop-up text (include any links). Analysis uses rule-based heuristics locally and is a guide, not a guarantee.</p>
+    <label for="ptxt">Message text</label>
+    <textarea id="ptxt" placeholder="Paste the message here..."></textarea>
+    <button class="btn" id="pgo">Analyze</button>
+    <button class="btn sec" id="psample">Load sample</button>
+    <div id="pout"></div>
+  </div>
+</section>
+
+<section id="play">
+  <div class="card">
+    <h2>Incident response playbook</h2>
+    <label for="psel">Scenario</label>
+    <select id="psel">
+      <option value="ransom">Ransomware</option>
+      <option value="phish">Phishing / credential compromise</option>
+      <option value="scam">Tech support scam</option>
+    </select>
+    <div style="display:flex;align-items:center;gap:16px;margin-top:12px;flex-wrap:wrap">
+      <div><div class="note">Time since incident started</div><div class="timer" id="timer">00:00:00</div></div>
+      <div style="flex:1;min-width:200px"><div class="note" id="plabel">0% complete</div><div class="bar"><div id="pbar"></div></div></div>
+    </div>
+    <button class="btn" id="tstart">Start incident clock</button>
+    <button class="btn sec" id="pexport">Export incident log</button>
+    <button class="btn sec" id="preset">Reset</button>
+  </div>
+  <div id="steps"></div>
+  <pre id="logout" style="display:none"></pre>
+</section>
+
+<section id="ready">
+  <div class="card">
+    <h2>Recovery readiness check</h2>
+    <p class="note">Answer honestly. Score and recommendations update live.</p>
+    <div id="rq"></div>
+    <h3 style="margin-top:16px">Score: <span id="rscore">0</span>/100 <span id="rpill" class="pill"></span></h3>
+    <div class="bar"><div id="rbar"></div></div>
+    <div id="rgaps"></div>
+  </div>
+</section>
+
+<section id="comm">
+  <div class="card">
+    <h2>Community alert generator</h2>
+    <p class="note">Warn your team, family or neighbours. Contains no sensitive data. Edit before sending.</p>
+    <label for="cwho">Your name / organisation</label><input id="cwho" placeholder="e.g. Greenview Community Clinic">
+    <label for="ctype">What happened</label>
+    <select id="ctype">
+      <option value="phish">Phishing email / text going around</option>
+      <option value="scam">Tech support scam calls or pop-ups</option>
+      <option value="ransom">Ransomware incident / systems down</option>
+    </select>
+    <label for="cdet">Details (sender, subject, phone number, etc.)</label><input id="cdet" placeholder="e.g. Email titled 'Invoice overdue' from billing@acme-pay.co">
+    <button class="btn" id="cgo">Generate</button>
+    <button class="btn sec" id="ccopy">Copy</button>
+    <pre id="cout">Click Generate.</pre>
+  </div>
+  <div class="card">
+    <h3>Where to report (US examples; use your country's equivalent)</h3>
+    <ul>
+      <li>Report cybercrime: ic3.gov (FBI) and reportfraud.ftc.gov</li>
+      <li>Ransomware help: cisa.gov/stopransomware and nomoreransom.org (free decryptors)</li>
+      <li>Phishing: forward to reportphishing@apwg.org; report in your mail client</li>
+      <li>Money sent: contact your bank immediately; ask for a recall/fraud hold</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function el(tag,props={},kids=[]){const e=document.createElement(tag);Object.assign(e,props);kids.forEach(k=>e.append(k));return e}
+
+// ---------- Tabs ----------
+function show(t){
+  $$('section').forEach(s=>s.classList.toggle('on',s.id===t));
+  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  window.scrollTo(0,0);
+}
+$$('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.t));
+$$('[data-play]').forEach(t=>t.onclick=()=>{$('#psel').value=t.dataset.play;loadPlay();show('play');startClock()});
+
+// ---------- Phishing checker ----------
+const rules=[
+ {re:/\b(urgent|immediately|within 24 hours|act now|final notice|suspended|last warning|expires? today)\b/i,w:15,m:"Creates urgency or threatens consequences"},
+ {re:/\b(verify|confirm|update|validate)\b.{0,40}\b(account|password|identity|payment|billing|login|credentials)\b/i,w:20,m:"Asks you to verify account or credentials"},
+ {re:/\b(password|passcode|one[- ]time code|otp|2fa code|ssn|social security|card number|cvv)\b/i,w:15,m:"Mentions sensitive secrets (password, codes, SSN, card)"},
+ {re:/\b(gift ?cards?|bitcoin|btc|crypto|wire transfer|western union|zelle)\b/i,w:25,m:"Requests payment by gift card, crypto or wire (scam hallmark)"},
+ {re:/\b(virus|malware|trojan|infected|hacked|security alert|your (pc|computer|device) (is|has))\b/i,w:20,m:"Claims your device is infected (tech support scam pattern)"},
+ {re:/\b(call|dial|contact)\b.{0,40}(\+?\d[\d\s().-]{7,})/i,w:20,m:"Pushes you to call a phone number"},
+ {re:/\b(anydesk|teamviewer|ultraviewer|remote (access|desktop|support)|quick ?assist)\b/i,w:30,m:"Asks for remote access to your computer"},
+ {re:/\.(exe|scr|js|vbs|iso|img|lnk|docm|xlsm|bat|msi)\b/i,w:25,m:"Mentions a risky attachment type"},
+ {re:/\b(refund|prize|winner|lottery|inheritance|overpaid|invoice attached)\b/i,w:10,m:"Unexpected money, refund, or invoice bait"},
+ {re:/\b(dear (customer|user|client|member)|valued customer)\b/i,w:8,m:"Generic greeting instead of your name"},
+ {re:/\b(do not tell|keep (this )?(confidential|secret)|don'?t (tell|inform))\b/i,w:15,m:"Asks you to keep it secret"}
+];
+function urlChecks(text){
+  const out=[];const urls=text.match(/\bhttps?:\/\/[^\s<>"')]+|\bwww\.[^\s<>"')]+/gi)||[];
+  urls.forEach(u=>{
+    let host="";try{host=new URL(u.startsWith('http')?u:'http://'+u).hostname}catch{return}
+    if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host))out.push({w:25,m:"Link uses a raw IP address: "+host});
+    if(/xn--/.test(host))out.push({w:25,m:"Link uses punycode (possible lookalike characters): "+host});
+    if(/\b(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|is\.gd|cutt\.ly|rb\.gy)\b/i.test(host))out.push({w:15,m:"Shortened link hides the real destination: "+host});
+    if(/\.(zip|top|xyz|click|work|support|rest|gq|tk|ml|cf|icu)$/i.test(host))out.push({w:15,m:"Link uses a TLD common in scams: "+host});
+    if(host.split('.').length>4)out.push({w:10,m:"Link has many subdomains: "+host});
+    if(/(paypa1|micr0soft|arnazon|amaz0n|g00gle|faceb00k|netfl1x|app1e)/i.test(host)||/(paypal|microsoft|amazon|google|apple|netflix|bank|office365)[-.]/i.test(host)&&!/\.(paypal|microsoft|amazon|google|apple|netflix)\.com$/i.test(host))out.push({w:25,m:"Link imitates a well-known brand: "+host});
+    if(u.startsWith('http://'))out.push({w:5,m:"Link is not encrypted (http): "+host});
+    if(/@/.test(u.replace(/^https?:\/\//,'').split('/')[0]))out.push({w:25,m:"Link contains '@' to disguise the real host"});
+  });
+  return out;
+}
+$('#pgo').onclick=()=>{
+  const t=$('#ptxt').value.trim();const o=$('#pout');o.replaceChildren();
+  if(!t){o.append(el('p',{textContent:'Paste something first.'}));return}
+  const hits=[];rules.forEach(r=>r.re.test(t)&&hits.push(r));urlChecks(t).forEach(h=>hits.push(h));
+  const score=Math.min(100,hits.reduce((a,h)=>a+h.w,0));
+  const lvl=score>=50?['high','Likely malicious']:score>=25?['med','Suspicious']:['low','No strong signs'];
+  o.append(el('h3',{},[`Risk ${score}/100 `,el('span',{className:'pill '+lvl[0],textContent:lvl[1]})]));
+  if(hits.length){const ul=el('ul');hits.forEach(h=>ul.append(el('li',{textContent:h.m})));o.append(ul)}
+  const adv=el('div',{className:'card'},[el('b',{textContent:'What to do'}),el('ul',{},
+    (score>=25?["Do not click links, open attachments, call numbers or install anything.","Do not reply. Report it, then delete it.","If you already interacted, open the Response playbook now."]
+     :["Still verify the sender through a channel you already trust (not the message).","When unsure, treat it as suspicious."]).map(x=>el('li',{textContent:x})))]);
+  o.append(adv);
+  if(score>=25){const b=el('button',{className:'btn',textContent:'I already clicked / replied → open playbook'});b.onclick=()=>{$('#psel').value=/virus|remote|call|anydesk|teamviewer/i.test(t)?'scam':'phish';loadPlay();show('play');startClock()};o.append(b)}
+};
+$('#psample').onclick=()=>{$('#ptxt').value="URGENT: Your Microsoft account has been suspended. Verify your password within 24 hours at http://micr0soft-support.top/login or your data will be deleted. Dear customer, we also detected a virus on your computer. Call +1 (800) 555-0199 and install AnyDesk so our technician can help. Open attached Invoice.docm"};
+
+// ---------- Playbooks ----------
+const PB={
+ransom:{name:"Ransomware",phases:[
+ ["1. Contain (first 15 min)",[
+  ["Disconnect infected devices from network","Unplug Ethernet, turn off Wi-Fi. Do NOT power off if you may need memory forensics; do not wipe."],
+  ["Isolate shared drives, backups and cloud sync","Pause OneDrive/Dropbox sync; disconnect external backup drives so they aren't encrypted."],
+  ["Alert your response lead and staff","Use phone or an out-of-band channel, not the compromised email."],
+  ["Photograph the ransom note and screens","Evidence for police, insurers and responders."]]],
+ ["2. Assess",[
+  ["Identify scope: which systems and data are affected","List machines, servers, accounts, file shares."],
+  ["Identify the ransomware strain","Upload the note or a sample file to ID Ransomware (id-ransomware.malwarehunter.team) or check nomoreransom.org."],
+  ["Confirm backups are clean and intact","Check last good backup date; this sets your RPO (data lost)."],
+  ["Check for data theft","Many gangs steal data first. Review outbound traffic; consider breach-notification duties."]]],
+ ["3. Eradicate",[
+  ["Reset all passwords and revoke sessions","Start with admin, email, VPN and backup accounts; enable MFA."],
+  ["Remove malware and the attacker's access","Use trusted EDR/AV from a clean device; rebuild if unsure."],
+  ["Patch the entry point","Commonly phishing, exposed RDP, or unpatched VPN."]]],
+ ["4. Recover",[
+  ["Restore from clean backups in priority order","Critical services first. Rebuild OS from trusted media, then restore data."],
+  ["Test restored systems before reconnecting","Scan restored data; monitor closely for 2 weeks."],
+  ["Report the crime","Police, ic3.gov, CISA. Notify insurer. Seek legal advice before considering any payment; payment does not guarantee recovery."]]],
+ ["5. Learn",[
+  ["Write a post-incident review","Timeline, root cause, what worked, what didn't."],
+  ["Fix gaps: offline backups, MFA, training, restore drills","Use the Readiness score tab."],
+  ["Warn your community","Use the Community alert tab."]]]]},
+phish:{name:"Phishing / credential compromise",phases:[
+ ["1. Contain (first 15 min)",[
+  ["Disconnect the device from the network if you opened an attachment","Wi-Fi off / unplug Ethernet."],
+  ["Change the password for the targeted account from a different, clean device","Then change any account that reused that password."],
+  ["Sign out all sessions and revoke app access","Account security page: 'sign out everywhere'."],
+  ["Tell your IT/security contact or manager","Speed matters; there is no blame."]]],
+ ["2. Assess",[
+  ["Check account for forwarding rules, new devices, and sent mail","Attackers hide forwarding rules to keep reading mail."],
+  ["Review bank and card activity","Look for new payees or small test charges."],
+  ["List what was entered or shared","Passwords, codes, card numbers, documents."]]],
+ ["3. Eradicate",[
+  ["Enable MFA (authenticator app or passkey, not SMS if possible)","Protects even if password leaks again."],
+  ["Run a full malware scan","Use built-in Windows Security / trusted AV."],
+  ["Remove malicious rules, apps, and unknown devices","Verify in account settings."]]],
+ ["4. Recover",[
+  ["Call bank/card issuer if financial info was shared","Freeze or replace cards; consider credit freeze."],
+  ["Report the phish","Mail client 'report phishing', reportphishing@apwg.org, ftc.gov."],
+  ["Notify contacts if your account sent spam","A short warning stops the chain."]]],
+ ["5. Learn",[
+  ["Use a password manager with unique passwords",""],
+  ["Run a phishing awareness refresher","Use the Phishing checker with real examples."]]]]},
+scam:{name:"Tech support scam",phases:[
+ ["1. Contain (first 15 min)",[
+  ["Hang up. Do not call back. Close the pop-up","If the page is locked: Ctrl+Alt+Del, Task Manager, end the browser; or hold power to restart."],
+  ["Disconnect remote access","Uninstall AnyDesk/TeamViewer/QuickAssist; turn off Wi-Fi if the scammer is connected."],
+  ["Do not pay or give more codes or card details","Real support never demands gift cards, crypto or wires."]]],
+ ["2. Assess",[
+  ["Recall exactly what you shared or installed","Write down numbers called, names, amounts, times."],
+  ["Check banking or online accounts you opened while connected","Scammers may have seen screens or passwords."]]],
+ ["3. Eradicate",[
+  ["Change passwords from a different clean device","Bank, email, and main accounts first."],
+  ["Run a full malware scan, then consider an OS reset if access was given","Remote sessions can install backdoors."]]],
+ ["4. Recover",[
+  ["If money was sent, call your bank right away","Ask to recall the transfer and block the card. Gift cards: contact the issuer."],
+  ["Report it","ftc.gov / ic3.gov or national fraud line. Keep the number and screenshots."],
+  ["Watch for 'recovery' scams","Follow-up callers offering refunds for a fee are also scammers."]]],
+ ["5. Learn",[
+  ["Tell family and neighbours who might be targeted","Use the Community alert tab."],
+  ["Remember: browser pop-ups can't detect viruses and Microsoft/Apple never cold-call","Share the rule."]]]]}
+};
+let state=JSON.parse(localStorage.getItem('cr_state')||'{}');
+function sv(){localStorage.setItem('cr_state',JSON.stringify(state))}
+function cur(){const k=$('#psel').value;state[k]=state[k]||{done:{},start:null,log:[]};return state[k]}
+function loadPlay(){
+  const k=$('#psel').value,pb=PB[k],s=cur(),box=$('#steps');box.replaceChildren();
+  pb.phases.forEach((ph,pi)=>{
+    const c=el('div',{className:'card'},[el('h3',{textContent:ph[0]})]);
+    ph[1].forEach((st,si)=>{
+      const id=pi+'-'+si;
+      const cb=el('input',{type:'checkbox',checked:!!s.done[id]});
+      const row=el('div',{className:'step'+(s.done[id]?' done':'')},[cb,el('span',{},[st[0],el('small',{textContent:st[1]})])]);
+      cb.onchange=()=>{
+        if(cb.checked){s.done[id]=Date.now();s.log.push({t:Date.now(),m:'Done: '+st[0]})}else{delete s.done[id];s.log.push({t:Date.now(),m:'Undone: '+st[0]})}
+        sv();loadPlay()};
+      c.append(row)});
+    box.append(c)});
+  prog();tick();
+}
+function total(){return PB[$('#psel').value].phases.reduce((a,p)=>a+p[1].length,0)}
+function prog(){const n=Object.keys(cur().done).length,p=Math.round(n/total()*100);$('#pbar').style.width=p+'%';$('#plabel').textContent=`${p}% complete (${n}/${total()} steps)`}
+function startClock(){const s=cur();if(!s.start){s.start=Date.now();s.log.push({t:s.start,m:'Incident clock started'});sv()}tick()}
+function tick(){const s=cur();if(!s.start){$('#timer').textContent='00:00:00';return}
+  const d=Math.floor((Date.now()-s.start)/1000),f=n=>String(n).padStart(2,'0');
+  $('#timer').textContent=`${f(Math.floor(d/3600))}:${f(Math.floor(d%3600/60))}:${f(d%60)}`}
+setInterval(tick,1000);
+$('#psel').onchange=loadPlay;
+$('#tstart').onclick=startClock;
+$('#preset').onclick=()=>{if(confirm('Reset this playbook and clock?')){delete state[$('#psel').value];sv();loadPlay()}};
+$('#pexport').onclick=()=>{
+  const k=$('#psel').value,s=cur();
+  const lines=[`INCIDENT LOG: ${PB[k].name}`,`Started: ${s.start?new Date(s.start).toLocaleString():'not started'}`,`Progress: ${$('#plabel').textContent}`,''];
+  s.log.forEach(l=>lines.push(`${new Date(l.t).toLocaleTimeString()}  ${l.m}`));
+  const o=$('#logout');o.style.display='block';o.textContent=lines.join('\n');
+  const a=el('a',{href:URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'})),download:'incident-log.txt'});a.click()};
+loadPlay();
+
+// ---------- Readiness ----------
+const RQ=[
+ ["We keep backups offline or immutable (cannot be changed by a hacked computer)",20,"Add an offline or immutable backup copy (3-2-1-1-0 rule)."],
+ ["We have tested restoring from backup in the last 6 months",15,"Run a restore drill. Untested backups often fail."],
+ ["MFA is on for email, banking, and admin accounts",15,"Turn on MFA everywhere, starting with email and admin accounts."],
+ ["Devices and software get automatic updates",10,"Enable automatic updates and patch VPN/remote access first."],
+ ["We have a written incident plan with phone numbers (offline copy)",10,"Write a one-page plan and print it. Email may be down."],
+ ["People know how to report a suspicious message",10,"Set up a simple reporting route and run a phishing refresher."],
+ ["Staff/family know tech support never cold-calls or demands gift cards",5,"Share the tech support scam rule."],
+ ["We use unique passwords via a password manager",10,"Adopt a password manager."],
+ ["We know our most critical systems and how long we can be down (RTO)",5,"List top 5 systems and maximum tolerable downtime."]
+];
+const ra=JSON.parse(localStorage.getItem('cr_ready')||'{}');
+RQ.forEach((q,i)=>{
+  const cb=el('input',{type:'checkbox',checked:!!ra[i]});
+  cb.onchange=()=>{ra[i]=cb.checked;localStorage.setItem('cr_ready',JSON.stringify(ra));rcalc()};
+  $('#rq').append(el('div',{className:'step'},[cb,el('span',{textContent:q[0]})]))});
+function rcalc(){
+  let sc=0;const gaps=$('#rgaps');gaps.replaceChildren();
+  const ul=el('ul');
+  RQ.forEach((q,i)=>{if(ra[i])sc+=q[1];else ul.append(el('li',{textContent:q[2]}))});
+  $('#rscore').textContent=sc;$('#rbar').style.width=sc+'%';
+  const p=$('#rpill'),l=sc>=75?['low','Resilient']:sc>=45?['med','Exposed']:['high','Critical gaps'];
+  p.className='pill '+l[0];p.textContent=l[1];
+  $('#rbar').style.background=sc>=75?'var(--ok)':sc>=45?'var(--warn)':'var(--bad)';
+  if(ul.children.length){gaps.append(el('h3',{textContent:'Fix these first'}),ul)}
+}
+rcalc();
+
+// ---------- Community alert ----------
+$('#cgo').onclick=()=>{
+  const who=$('#cwho').value.trim()||'Your IT contact',t=$('#ctype').value,d=$('#cdet').value.trim();
+  const body={
+   phish:["Phishing alert","Do NOT click links or open attachments in this message. If you did, change your password now from another device and tell us."],
+   scam:["Tech support scam alert","Microsoft, Apple, and your bank will never cold-call you or show pop-ups with phone numbers. Hang up, do not install anything, never pay with gift cards or crypto."],
+   ransom:["Systems incident: ransomware suspected","Disconnect from the network and do not use shared drives. Do not open any email attachments until told. Use phone for updates."]}[t];
+  $('#cout').textContent=`⚠ ${body[0].toUpperCase()}\nFrom: ${who}\nDate: ${new Date().toLocaleString()}\n\n${d?'Details: '+d+'\n\n':''}${body[1]}\n\nIf unsure, check with us using a phone number you already know. Report suspicious messages to ${who}.`};
+$('#ccopy').onclick=()=>navigator.clipboard.writeText($('#cout').textContent).then(()=>alert('Copied'));
+</script>
+</body>
+</html>
